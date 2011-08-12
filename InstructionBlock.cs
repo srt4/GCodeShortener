@@ -94,7 +94,9 @@ namespace GCodeShortener
 		{
 			double x = 0;
 			double y = 0;
-			foreach (Instruction i in instructions) {
+			ArrayList temp = (ArrayList) instructions.Clone ();
+			temp.Reverse ();
+			foreach (Instruction i in temp) {
 				if (i.x.HasValue && i.y.HasValue) {
 					x = i.x.Value;
 					y = i.y.Value;
