@@ -5,9 +5,9 @@ namespace GCodeShortener
 	{
 		// Public, private fields
 		public Instruction parent;
-		public int? x;
-		public int? y;
-		public int? z;
+		public double? x;
+		public double? y;
+		public double? z;
 		public String type;
 		
 		// Should not be able to construct an empty instruction
@@ -22,14 +22,14 @@ namespace GCodeShortener
 		}
 		
 		// Accepts a type, and potential z-coordinate for an instruction
-		public Instruction (String type, int z)
+		public Instruction (String type, double z)
 		{
 			this.type = type;
 			this.z = z;
 		}
 		
 		// Accepts a type, and x,y-coordinates for an instruction
-		public Instruction (String type, int x, int y)
+		public Instruction (String type, double x, double y)
 		{
 			this.type = type;
 			this.x = x;
@@ -37,7 +37,7 @@ namespace GCodeShortener
 		}
 		
 		// Set z-value; throw an exception if it's specified with an x or y
-		public void setZ (int z)
+		public void setZ (double z)
 		{
 			if (this.y != null || this.x != null) 
 			{
@@ -47,7 +47,7 @@ namespace GCodeShortener
 		}
 		
 		// Set x-value; throw exception if paired with z
-		public void setX (int x)
+		public void setX (double x)
 		{
 			if (this.z != null) 
 			{
@@ -57,7 +57,7 @@ namespace GCodeShortener
 		}
 		
 		// Set y-value; throw exception if paired with z
-		public void setY (int y)
+		public void setY (double y)
 		{
 			if (this.z != null) 
 			{

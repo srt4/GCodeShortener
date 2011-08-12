@@ -79,12 +79,12 @@ namespace GCodeShortener
 			while (tempBlocks.Count > 0)
 			{
 				// Take out the origin, and then insert it into sorted blocks
-				origin = (InstructionBlock) tempBlocks[0];
+				origin = (InstructionBlock)tempBlocks[0];
 				tempBlocks.RemoveAt (0);
 				orderedBlocks.Add (origin);
 				
 				// Set the current shortest distance to infinity
-				int distance = Int32.MaxValue;
+				double distance = Double.PositiveInfinity;
 				InstructionBlock shortest = null;
 				
 				// Examine each reamining neighbor ... if it's shorter, it's the new destination
@@ -119,10 +119,10 @@ namespace GCodeShortener
 				return new Instruction (pieces[0]);
 			case 2:
 				// Probably a Z
-				return new Instruction (pieces[0], Int32.Parse(pieces[1]));
+				return new Instruction (pieces[0], Double.Parse(pieces[1]));
 			case 3:
 				// Probably an X,Y
-				return new Instruction (pieces[0], Int32.Parse(pieces[1]), Int32.Parse(pieces[2]));
+				return new Instruction (pieces[0], Double.Parse(pieces[1]), Double.Parse(pieces[2]));
 			}
 			
 			// Should not get here if a proper string is given
