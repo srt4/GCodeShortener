@@ -5,9 +5,9 @@ namespace GCodeShortener
 	{
 		// Public, private fields
 		public Instruction parent;
-		public int x;
-		public int y;
-		public int z;
+		public int? x;
+		public int? y;
+		public int? z;
 		public String type;
 		
 		// Should not be able to construct an empty instruction
@@ -57,7 +57,7 @@ namespace GCodeShortener
 		}
 		
 		// Set y-value; throw exception if paired with z
-		public void setY (int Y)
+		public void setY (int y)
 		{
 			if (this.z != null) 
 			{
@@ -69,9 +69,9 @@ namespace GCodeShortener
 		// Set type; throw an exception if M is paired with coordinates
 		public void setType (String type)
 		{
-			if (type.ToLower.StartsWith ("M")) 
+			if (type.ToLower().StartsWith ("M")) 
 			{
-				if (this.x != null || this.y != null || this.z != null) 
+				if (this.x.HasValue || this.y.HasValue || this.z.HasValue) 
 				{
 					throw new ArgumentException ("Type 'M' does not accept coordinates");
 				}
@@ -88,7 +88,7 @@ namespace GCodeShortener
 		// Instructions /should/ have a parent, unless they are of type "M"
 		public void addParent (Instruction parent)
 		{
-			if (this.type.ToLower.Equals ("m04")) 
+			if (this.type.ToLower().Equals ("m04")) 
 			{
 				throw new ArgumentException ("The instruction of type M cannot be called with a parent");
 			}

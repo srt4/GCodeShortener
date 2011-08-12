@@ -36,7 +36,7 @@ namespace GCodeShortener
 		// Takes the mean (x,y) of each instruction block,
 		// and then finds the distance between them using 
 		// a^2 + b^2 = c^2
-		public int Distance (InstructionBlock other)
+		public double Distance (InstructionBlock other)
 		{
 			int a = this.MeanX () - other.MeanX ();
 			int b = this.MeanY () - other.MeanY ();	
@@ -47,7 +47,7 @@ namespace GCodeShortener
 		// Returns the mean x-coordinate of a set of instructions
 		public int MeanX() 
 		{
-			ArrayList x;
+			ArrayList x = new ArrayList ();
 			foreach (Instruction instruction in this.getInstructions ()) 
 			{
 				if (instruction.x != null && instruction.y != null) 
@@ -61,7 +61,7 @@ namespace GCodeShortener
 		// Returns the mean y-coordinate of a set of instructions
 		public int MeanY()
 		{
-			ArrayList y;
+			ArrayList y = new ArrayList ();
 			foreach (Instruction instruction in this.getInstructions ()) 
 			{
 				if (instruction.x != null && instruction.y != null) 
@@ -76,14 +76,16 @@ namespace GCodeShortener
 		// returns the mean of all the values in it
 		private int arrayMean (ArrayList numbers)
 		{
-			int number, sum;
-			number = sum = 0;
+			int sum, count;
+			count = sum = 0;
 			
 			foreach (int number in numbers) 
 			{
-				number++;
-				sum++;
+				sum += number;
+				count++;
 			}
+			
+			return sum / count;
 		}
 	}
 }

@@ -24,7 +24,7 @@ namespace GCodeShortener
 				String line;
 				
 				// Keep track of the parent and the current block
-				Instruction parent;
+				Instruction parent = null;
 				InstructionBlock block = new InstructionBlock ();
 				// Go line-by-line through the file
 				while ((line = sr.ReadLine ()) != null) 
@@ -59,7 +59,7 @@ namespace GCodeShortener
 		public ArrayList ShortestPath (InstructionBlock origin)
 		{
 			// Find the index of the origin block
-			int originIndex = instructionBlocks.IndexOf (origin);
+			int? originIndex = instructionBlocks.IndexOf (origin);
 			
 			// Throw an error if it's not found
 			if (originIndex < 0 || originIndex == null) 
@@ -68,8 +68,9 @@ namespace GCodeShortener
 			}
 			
 			// Store the blocks that will be removed
-			ArrayList tempBlocks = instructionBlocks.Clone ();
-			tempBlocks.Insert (0, tempBlocks.RemoveAt (originIndex));
+			ArrayList tempBlocks = (ArrayList)instructionBlocks.Clone ();
+			tempBlocks.Insert (0, tempBlocks[originIndex.Value]);
+			tempBlocks.RemoveAt (originIndex.Value);
 			
 			// This is where the ordered blocks will go
 			ArrayList orderedBlocks = new ArrayList ();
@@ -78,12 +79,13 @@ namespace GCodeShortener
 			while (tempBlocks.Count > 0)
 			{
 				// Take out the origin, and then insert it into sorted blocks
-				InstructionBlock origin = tempBlocks.RemoveAt (0);
+				origin = (InstructionBlock) tempBlocks[0];
+				tempBlocks.RemoveAt (0);
 				orderedBlocks.Add (origin);
 				
 				// Set the current shortest distance to infinity
 				int distance = Int32.MaxValue;
-				InstructionBlock shortest;
+				InstructionBlock shortest = null;
 				
 				// Examine each reamining neighbor ... if it's shorter, it's the new destination
 				foreach (InstructionBlock destination in tempBlocks) 
@@ -108,7 +110,7 @@ namespace GCodeShortener
 		public Instruction StringToInstruction (String line)
 		{
 			// Split on whitespace
-			String[] pieces = line.Split (" ");
+			String[] pieces = line.Split (' ');
 
 			switch (pieces.Length)
 			{
@@ -117,10 +119,10 @@ namespace GCodeShortener
 				return new Instruction (pieces[0]);
 			case 2:
 				// Probably a Z
-				return new Instruction (pieces[0], pieces[1]);
+				return new Instruction (pieces[0], Int32.Parse(pieces[1]));
 			case 3:
 				// Probably an X,Y
-				return new Instruction (pieces[0], pieces[1], pieces[2]);
+				return new Instruction (pieces[0], Int32.Parse(pieces[1]), Int32.Parse(pieces[2]));
 			}
 			
 			// Should not get here if a proper string is given
