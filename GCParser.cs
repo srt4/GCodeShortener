@@ -70,7 +70,7 @@ namespace GCodeShortener
 			// Store the blocks that will be removed
 			ArrayList tempBlocks = (ArrayList)instructionBlocks.Clone ();
 			tempBlocks.Insert (0, tempBlocks[originIndex.Value]);
-			tempBlocks.RemoveAt (originIndex.Value);
+			tempBlocks.RemoveAt (originIndex.Value + 1);
 			
 			// This is where the ordered blocks will go
 			ArrayList orderedBlocks = new ArrayList ();
@@ -105,6 +105,33 @@ namespace GCodeShortener
 			return orderedBlocks;
 		}
 		
+		// Another distance-sorting method that tries to sort based on the 
+		// end of the origin instruction, to the beginning of all destinations
+		public ArrayList ShortestGaps ()
+		{
+			ArrayList tempBlocks = (ArrayList)instructionBlocks.Clone ();
+			ArrayList orderedBlocks = new ArrayList ();
+			while (tempBlocks.Count > 1)
+			{
+				InstructionBlock origin = (InstructionBlock)tempBlocks[0];
+				tempBlocks.RemoveAt (0);
+				orderedBlocks.Add (origin);
+				InstructionBlock shortest = null;
+				double distance = Double.PositiveInfinity;
+				foreach (InstructionBlock b in tempBlocks) 
+				{
+					if (origin.NewDistance (b) < distance)
+					{
+						shortest = b;
+					}
+				}
+				tempBlocks.Remove (shortest);
+				tempBlocks.Insert (0, shortest);
+			}
+			return orderedBlocks;
+			
+		}
+		
 		// Takes a string, such as "G01 X2.0000 Y1.0000", and converts 
 		// it to an instruction object
 		public Instruction StringToInstruction (String line)
@@ -119,12 +146,16 @@ namespace GCodeShortener
 				{
 					string pieceType = piece.Substring (0, 1);
 					double pieceValue = Double.Parse (piece.Substring (1));
+					
 					switch (Char.Parse (pieceType)) {
 					case 'M':
 						i.setType (piece);
 						break;
 					case 'G':
-						i.setType (piece);
+						if (piece.Substring (1, 1).Equals ("-"))
+							i.extra += piece + " ";
+						else
+							i.setType (piece);
 						break;
 					case 'X':
 						i.setX (pieceValue);
@@ -136,7 +167,7 @@ namespace GCodeShortener
 						i.setZ (pieceValue);
 						break;
 					default:
-						i.extra = piece;
+						i.extra += piece + " ";
 						break;
 					}
 				}
@@ -146,7 +177,7 @@ namespace GCodeShortener
 		
 		public void WriteInstructions ()
 		{
-			foreach (InstructionBlock i in this.ShortestPath ())
+			foreach (InstructionBlock i in this.ShortestGaps ())
 			{
 				foreach (Instruction j in i.instructions)
 				{

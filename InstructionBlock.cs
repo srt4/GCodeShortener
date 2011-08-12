@@ -72,6 +72,46 @@ namespace GCodeShortener
 			return arrayMean (y);
 		}
 		
+		// First instruction point
+		public Point FirstPoint ()
+		{
+			double x = 0;
+			double y = 0;
+			foreach (Instruction i in instructions)
+			{
+				if (i.x.HasValue && i.y.HasValue)
+				{
+					x = i.x.Value;
+					y = i.y.Value;
+					break;
+				}
+			}
+			return new Point (x, y);
+		}
+		
+		// Last instruction point
+		public Point LastPoint ()
+		{
+			double x = 0;
+			double y = 0;
+			foreach (Instruction i in instructions) {
+				if (i.x.HasValue && i.y.HasValue) {
+					x = i.x.Value;
+					y = i.y.Value;
+					break;
+				}
+			}
+			return new Point (x, y);
+		}
+		
+		public double NewDistance (InstructionBlock other)
+		{
+			double a = this.FirstPoint ().x - other.LastPoint ().x;
+			double b = this.FirstPoint ().y - other.LastPoint ().y;
+			double csquared = Math.Pow (a, 2) + Math.Pow (b, 2);
+			return Math.Sqrt (csquared);
+		}
+		
 		// This method takes an arraylist, and then
 		// returns the mean of all the values in it
 		private double arrayMean (ArrayList numbers)
@@ -87,6 +127,8 @@ namespace GCodeShortener
 			
 			return sum / count;
 		}
+		
+		
 	}
 }
 

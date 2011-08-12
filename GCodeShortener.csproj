@@ -41,6 +41,7 @@
     <Compile Include="Instruction.cs" />
     <Compile Include="InstructionBlock.cs" />
     <Compile Include="GCParser.cs" />
+    <Compile Include="Point.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
