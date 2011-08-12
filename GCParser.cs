@@ -22,37 +22,37 @@ namespace GCodeShortener
 			{
 				// The line in the file
 				String line;
-				
-				// Keep track of the parent and the current block
-				Instruction parent = null;
 				InstructionBlock block = new InstructionBlock ();
-				// Go line-by-line through the file
+				Instruction parent = null;
 				while ((line = sr.ReadLine ()) != null) 
 				{
-					// Get the instruction object
-					Instruction instruction = StringToInstruction (line);
+					Instruction i = StringToInstruction (line);
 					
-					// Start spindle instruction - usually a parent
-					if (instruction.type.Equals ("M04")) 
+					// Base case: it's the beginning of an instruction group
+					if (i.type.Equals ("G00") && i.z.HasValue && i.z > 0) 
 					{
-						parent = instruction;
-					}
-					
-					// Set the parent
-					instruction.addParent (parent);
-					
-					// End spindle instruction
-					if (instruction.type.Equals ("M05"))
-					{
-						parent = null;
-						instructionBlocks.Add(block);
+						if (block.instructions.Count > 0) 
+						{
+							instructionBlocks.Add (block);
+						}
 						block = new InstructionBlock ();
+						parent = i;
 					}
 					
-					// Add to the block
-					block.addInstruction (instruction);
+					// Set parent, if it's not null
+					if (parent != null)
+						i.addParent (i);
+					
+					// Finally, add the instruction to the block
+					block.addInstruction (i);
 				}
 			}
+		}
+		
+		// The origin is the first block found in the file
+		public ArrayList ShortestPath ()
+		{
+			return ShortestPath ((InstructionBlock) instructionBlocks[8]);
 		}
 		
 		// Returns an ordered array of the instructions sorted by distance between blocks
@@ -76,7 +76,7 @@ namespace GCodeShortener
 			ArrayList orderedBlocks = new ArrayList ();
 			
 			// Starts at the origin, goes through each block
-			while (tempBlocks.Count > 0)
+			while (tempBlocks.Count > 1)
 			{
 				// Take out the origin, and then insert it into sorted blocks
 				origin = (InstructionBlock)tempBlocks[0];
@@ -111,22 +111,52 @@ namespace GCodeShortener
 		{
 			// Split on whitespace
 			String[] pieces = line.Split (' ');
-
-			switch (pieces.Length)
-			{
-			case 1:
-				// Probably an M
-				return new Instruction (pieces[0]);
-			case 2:
-				// Probably a Z
-				return new Instruction (pieces[0], Double.Parse(pieces[1]));
-			case 3:
-				// Probably an X,Y
-				return new Instruction (pieces[0], Double.Parse(pieces[1]), Double.Parse(pieces[2]));
-			}
+			Instruction i = new Instruction ();
 			
-			// Should not get here if a proper string is given
-			return null;
+			foreach (String piece in pieces) 
+			{
+				if (piece.Length > 1) 
+				{
+					string pieceType = piece.Substring (0, 1);
+					double pieceValue = Double.Parse (piece.Substring (1));
+					switch (Char.Parse (pieceType)) {
+					case 'M':
+						i.setType (piece);
+						break;
+					case 'G':
+						i.setType (piece);
+						break;
+					case 'X':
+						i.setX (pieceValue);
+						break;
+					case 'Y':
+						i.setY (pieceValue);
+						break;
+					case 'Z':
+						i.setZ (pieceValue);
+						break;
+					default:
+						i.extra = piece;
+						break;
+					}
+				}
+			}
+			return i;
+		}
+		
+		public void WriteInstructions ()
+		{
+			foreach (InstructionBlock i in this.ShortestPath ())
+			{
+				foreach (Instruction j in i.instructions)
+				{
+					Console.Out.WriteLine (j.ToString ());
+				}
+			}
+		}
+		
+		public void WriteInstructions (string filename)
+		{
 		}
 	}
 }

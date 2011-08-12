@@ -5,7 +5,7 @@ namespace GCodeShortener
 {
 	public class InstructionBlock
 	{
-		ArrayList instructions;
+		public ArrayList instructions;
 		
 		// Instantiates an empty instructionblock object
 		public InstructionBlock ()

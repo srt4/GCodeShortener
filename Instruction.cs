@@ -9,6 +9,7 @@ namespace GCodeShortener
 		public double? y;
 		public double? z;
 		public String type;
+		public String extra;
 		
 		// Should not be able to construct an empty instruction
 		public Instruction ()
@@ -39,30 +40,18 @@ namespace GCodeShortener
 		// Set z-value; throw an exception if it's specified with an x or y
 		public void setZ (double z)
 		{
-			if (this.y != null || this.x != null) 
-			{
-				throw new ArgumentException ("You cannot specify a z-coordinate when x or y coordinates exist");
-			}
 			this.z = z;
 		}
 		
 		// Set x-value; throw exception if paired with z
 		public void setX (double x)
 		{
-			if (this.z != null) 
-			{
-				throw new ArgumentException ("You cannot specify an x-coordinate when a z coordinate exists");
-			}
 			this.x = x;
 		}
 		
 		// Set y-value; throw exception if paired with z
 		public void setY (double y)
 		{
-			if (this.z != null) 
-			{
-				throw new ArgumentException ("You cannot specify a y-coordinate when a z coordinate exists");
-			}
 			this.y = y;
 		}
 		
@@ -93,6 +82,29 @@ namespace GCodeShortener
 				throw new ArgumentException ("The instruction of type M cannot be called with a parent");
 			}
 			this.parent = parent;
+		}
+		
+		public override string ToString ()
+		{
+			string returnString = this.type + " ";
+			if (this.x.HasValue)
+			{
+				returnString += "X" + this.x.Value.ToString () + " ";
+			}
+			if (this.y.HasValue)
+			{
+				returnString += "Y" + this.y.Value.ToString () + " ";
+			}
+			if (this.z.HasValue)
+			{
+				returnString += "Z" + this.z.Value.ToString () + " ";
+			}
+			if (this.extra != null) 
+			{
+				returnString += this.extra + " ";
+			}
+			
+			return returnString;
 		}
 	}
 }
