@@ -45,7 +45,7 @@ namespace GCodeShortener
 		}
 		
 		// Returns the mean x-coordinate of a set of instructions
-		public double MeanX() 
+		public double MeanX () 
 		{
 			ArrayList x = new ArrayList ();
 			foreach (Instruction instruction in this.getInstructions ()) 
@@ -59,7 +59,7 @@ namespace GCodeShortener
 		}
 		
 		// Returns the mean y-coordinate of a set of instructions
-		public double MeanY()
+		public double MeanY ()
 		{
 			ArrayList y = new ArrayList ();
 			foreach (Instruction instruction in this.getInstructions ()) 
@@ -94,7 +94,7 @@ namespace GCodeShortener
 		{
 			double x = 0;
 			double y = 0;
-			ArrayList temp = (ArrayList) instructions.Clone ();
+			ArrayList temp = (ArrayList)instructions.Clone ();
 			temp.Reverse ();
 			foreach (Instruction i in temp) {
 				if (i.x.HasValue && i.y.HasValue) {
@@ -128,9 +128,7 @@ namespace GCodeShortener
 			}
 			
 			return sum / count;
-		}
-		
-		
+		}	
 	}
 }
 

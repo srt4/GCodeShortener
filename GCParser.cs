@@ -8,31 +8,37 @@ namespace GCodeShortener
 	{
 		public ArrayList instructionBlocks;
 		
+		//
 		public GCParser ()
 		{
+			instructionBlocks = new ArrayList ();
 		}
 		
+		// 
 		public GCParser (String filename)
 		{
 			// Instantiate all of the blocks
 			instructionBlocks = new ArrayList ();
 			
 			// Open up the file
+			this.LoadFile (filename);
+		}
+		
+		// Accepts a string filename and loads the contents into instructionBlocks
+		public Boolean LoadFile (string filename)
+		{
 			using (StreamReader sr = new StreamReader (filename)) 
 			{
 				// The line in the file
 				String line;
 				InstructionBlock block = new InstructionBlock ();
 				Instruction parent = null;
-				while ((line = sr.ReadLine ()) != null) 
-				{
+				while ((line = sr.ReadLine ()) != null) {
 					Instruction i = StringToInstruction (line);
 					
 					// Base case: it's the beginning of an instruction group
-					if (i.type.Equals ("G00") && i.z.HasValue && i.z > 0) 
-					{
-						if (block.instructions.Count > 0) 
-						{
+					if (i.type.Equals ("G00") && i.z.HasValue && i.z > 0) {
+						if (block.instructions.Count > 0) {
 							instructionBlocks.Add (block);
 						}
 						block = new InstructionBlock ();
@@ -47,6 +53,8 @@ namespace GCodeShortener
 					block.addInstruction (i);
 				}
 			}
+			
+			return true;
 		}
 		
 		// The origin is the first block found in the file
@@ -101,7 +109,8 @@ namespace GCodeShortener
 				tempBlocks.Remove (shortest);
 				tempBlocks.Insert (0, shortest);
 			}
-			
+			// Add the final block with no neighbors
+			orderedBlocks.Add (tempBlocks[0]);
 			return orderedBlocks;
 		}
 		
@@ -111,6 +120,7 @@ namespace GCodeShortener
 		{
 			ArrayList tempBlocks = (ArrayList)instructionBlocks.Clone ();
 			ArrayList orderedBlocks = new ArrayList ();
+			double totalDistance = 0;
 			while (tempBlocks.Count > 1)
 			{
 				InstructionBlock origin = (InstructionBlock)tempBlocks[0];
@@ -118,18 +128,23 @@ namespace GCodeShortener
 				orderedBlocks.Add (origin);
 				InstructionBlock shortest = null;
 				double distance = Double.PositiveInfinity;
-				foreach (InstructionBlock b in tempBlocks) 
+				
+				foreach (InstructionBlock neighbor in tempBlocks) 
 				{
-					if (origin.NewDistance (b) < distance)
+					if (origin.NewDistance (neighbor) < distance)
 					{
-						shortest = b;
+						shortest = neighbor;
+						distance = origin.NewDistance (neighbor);
 					}
 				}
+				totalDistance += origin.NewDistance (shortest);
 				tempBlocks.Remove (shortest);
 				tempBlocks.Insert (0, shortest);
 			}
-			return orderedBlocks;
-			
+			Console.Out.WriteLine ("Distance was " + totalDistance.ToString ());
+			// Add the final block with no neighbors
+			orderedBlocks.Add (tempBlocks[0]);
+			return orderedBlocks;		
 		}
 		
 		// Takes a string, such as "G01 X2.0000 Y1.0000", and converts 
@@ -177,12 +192,24 @@ namespace GCodeShortener
 		
 		public void WriteInstructions ()
 		{
-			foreach (InstructionBlock i in this.ShortestGaps ())
+			int zebra = 0;
+			//foreach (InstructionBlock i in this.ShortestGaps ())
+			foreach (InstructionBlock i in instructionBlocks)
 			{
+				Console.Out.Write ("<pre style='margin:0px;");
+				if (++zebra % 2 == 0) 
+				{
+					Console.Out.Write ("color:gray'>");
+				} 
+				else 
+				{
+					Console.Out.Write ("color:black'>");
+				}
 				foreach (Instruction j in i.instructions)
 				{
 					Console.Out.WriteLine (j.ToString ());
 				}
+				Console.Out.Write ("</pre>");
 			}
 		}
 		

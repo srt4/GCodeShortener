@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Globalization;
+
 
 namespace GCodeShortener
 {
@@ -17,12 +19,15 @@ namespace GCodeShortener
 			instructionArray.Add ("G01 X1.0000 Y1.0000");
 			instructionArray.Add ("G00 Z1.000");
 			instructionArray.Add ("M05");
-			
+
 			foreach (String instruction in instructionArray) 
 			{
 				//Console.Out.WriteLine(instruction);
 			}
 			GCParser parser = new GCParser ("/Users/spencer/Projects/mezzo.nc");
+			
+			parser.instructionBlocks = parser.ShortestGaps ();
+			//parser.instructionBlocks = parser.ShortestPath ();
 			parser.WriteInstructions ();
 		}
 	}
