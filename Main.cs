@@ -24,11 +24,53 @@ namespace GCodeShortener
 			{
 				//Console.Out.WriteLine(instruction);
 			}
-			GCParser parser = new GCParser ("/Users/spencer/Projects/mezzo.nc");
 			
-			parser.instructionBlocks = parser.ShortestGaps ();
-			//parser.instructionBlocks = parser.ShortestPath ();
-			parser.WriteInstructions ();
+			
+			GCParser parser = OpenFile ();
+			Menu (parser);
+
+		}
+		
+		private static GCParser OpenFile ()
+		{
+			Console.WriteLine ("Please enter a file location: ");
+			string filename = Console.ReadLine ();
+			return new GCParser (filename);
+		}
+		
+		private static void Menu (GCParser parser)
+		{
+			Console.Out.WriteLine ("What would you like to do?");
+			Console.Out.WriteLine ("[O]ptimize the file using ShortestPath method");
+			Console.Out.WriteLine ("Optimize the file using [S]hortestGaps method");
+			Console.Out.WriteLine ("[C]alculate the distance traveled in the file");
+			Console.Out.WriteLine ("[P]rint out the set of instructions");
+			Console.Out.WriteLine ("[W]rite the instructions to a file");
+			
+			string choice = Console.In.ReadLine ();
+			switch (choice.ToLower ().Substring (0, 1)) {
+			case "o":
+				parser.instructionBlocks = parser.ShortestPath ();
+				Console.Out.WriteLine ("The file is now optimized with ShortestPath");
+				Menu (parser);
+				break;
+			case "s":
+				parser.instructionBlocks = parser.ShortestGaps ();
+				Console.Out.WriteLine ("The file is now optimized with ShortestGaps");
+				Menu (parser);
+				break;
+			case "c":
+				Console.Out.WriteLine ("The total distance traveled in this file is " + parser.TotalDistance (parser.instructionBlocks));
+				Menu (parser);
+				break;
+			case "p":
+				parser.WriteInstructions ();
+				Menu (parser);
+				break;
+			case "w":
+				Menu (parser);
+				break;
+			}
 		}
 	}
 }

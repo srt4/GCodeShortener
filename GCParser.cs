@@ -20,6 +20,7 @@ namespace GCodeShortener
 			// Instantiate all of the blocks
 			instructionBlocks = new ArrayList ();
 			
+			Console.WriteLine ("Attempting to open " + filename);
 			// Open up the file
 			this.LoadFile (filename);
 		}
@@ -147,6 +148,18 @@ namespace GCodeShortener
 			return orderedBlocks;		
 		}
 		
+		// Accepts an arraylist of instructions (such as the one modified
+		// by ShortestGaps) and returns the distance traveled.
+		public double TotalDistance (ArrayList path)
+		{
+			double totalDistance = 0;
+			for (int i = 1; i < path.Count; i++) 
+			{
+				totalDistance += ((InstructionBlock)path[i - 1]).NewDistance (((InstructionBlock)path[i]));
+			}
+			return totalDistance;
+		}	
+			
 		// Takes a string, such as "G01 X2.0000 Y1.0000", and converts 
 		// it to an instruction object
 		public Instruction StringToInstruction (String line)
