@@ -33,7 +33,7 @@ namespace GCodeShortener
 		
 		private static GCParser OpenFile ()
 		{
-			Console.WriteLine ("Please enter a file location: ");
+			Console.Write ("Please enter a file location: ");
 			string filename = Console.ReadLine ();
 			return new GCParser (filename);
 		}
@@ -41,8 +41,8 @@ namespace GCodeShortener
 		private static void Menu (GCParser parser)
 		{
 			Console.Out.WriteLine ("What would you like to do?");
-			Console.Out.WriteLine ("[O]ptimize the file using ShortestPath method");
-			Console.Out.WriteLine ("Optimize the file using [S]hortestGaps method");
+			Console.Out.WriteLine ("[O]ptimize the file using ShortestPath method (not working)");
+			Console.Out.WriteLine ("Optimize the file using [S]hortestGaps method (working)");
 			Console.Out.WriteLine ("[C]alculate the distance traveled in the file");
 			Console.Out.WriteLine ("[P]rint out the set of instructions");
 			Console.Out.WriteLine ("[W]rite the instructions to a file");
@@ -68,7 +68,13 @@ namespace GCodeShortener
 				Menu (parser);
 				break;
 			case "w":
-				Menu (parser);
+				Console.Write ("Output filename? (enter for " + parser.filename + ".optimized.nc) ");
+				string path = Console.ReadLine ();
+				if (path.Equals (""))
+				{
+					path = parser.filename + ".optimized.nc";
+				}
+				parser.WriteInstructions (path);
 				break;
 			}
 		}

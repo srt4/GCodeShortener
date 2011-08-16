@@ -7,6 +7,9 @@ namespace GCodeShortener
 	public class GCParser
 	{
 		public ArrayList instructionBlocks;
+		public string filename; 
+		// This block is temporarily here until I find a way to exclude M-blocks
+		public InstructionBlock final;
 		
 		//
 		public GCParser ()
@@ -28,13 +31,16 @@ namespace GCodeShortener
 		// Accepts a string filename and loads the contents into instructionBlocks
 		public Boolean LoadFile (string filename)
 		{
+			this.filename = filename;
 			using (StreamReader sr = new StreamReader (filename)) 
 			{
 				// The line in the file
 				String line;
 				InstructionBlock block = new InstructionBlock ();
 				Instruction parent = null;
+				int countLines = 0;
 				while ((line = sr.ReadLine ()) != null) {
+					++countLines;
 					Instruction i = StringToInstruction (line);
 					
 					// Base case: it's the beginning of an instruction group
@@ -53,6 +59,15 @@ namespace GCodeShortener
 					// Finally, add the instruction to the block
 					block.addInstruction (i);
 				}
+				
+				// Add the last block, if it's not already added
+				if (! (block == null || instructionBlocks.Contains(block))) 
+				{
+					instructionBlocks.Add (block);
+				}
+				
+				Console.WriteLine ("Read " + countLines + " lines.");
+				return true;
 			}
 			
 			return true;
@@ -121,7 +136,6 @@ namespace GCodeShortener
 		{
 			ArrayList tempBlocks = (ArrayList)instructionBlocks.Clone ();
 			ArrayList orderedBlocks = new ArrayList ();
-			double totalDistance = 0;
 			while (tempBlocks.Count > 1)
 			{
 				InstructionBlock origin = (InstructionBlock)tempBlocks[0];
@@ -138,26 +152,26 @@ namespace GCodeShortener
 						distance = origin.NewDistance (neighbor);
 					}
 				}
-				totalDistance += origin.NewDistance (shortest);
 				tempBlocks.Remove (shortest);
 				tempBlocks.Insert (0, shortest);
 			}
-			Console.Out.WriteLine ("Distance was " + totalDistance.ToString ());
+
 			// Add the final block with no neighbors
 			orderedBlocks.Add (tempBlocks[0]);
+			
 			return orderedBlocks;		
 		}
 		
 		// Accepts an arraylist of instructions (such as the one modified
 		// by ShortestGaps) and returns the distance traveled.
-		public double TotalDistance (ArrayList path)
+		public int TotalDistance (ArrayList path)
 		{
 			double totalDistance = 0;
 			for (int i = 1; i < path.Count; i++) 
 			{
 				totalDistance += ((InstructionBlock)path[i - 1]).NewDistance (((InstructionBlock)path[i]));
 			}
-			return totalDistance;
+			return (int) totalDistance;
 		}	
 			
 		// Takes a string, such as "G01 X2.0000 Y1.0000", and converts 
@@ -205,6 +219,7 @@ namespace GCodeShortener
 		
 		public void WriteInstructions ()
 		{
+			int lines = 0;
 			int zebra = 0;
 			//foreach (InstructionBlock i in this.ShortestGaps ())
 			foreach (InstructionBlock i in instructionBlocks)
@@ -220,14 +235,27 @@ namespace GCodeShortener
 				}
 				foreach (Instruction j in i.instructions)
 				{
+					++lines;
 					Console.Out.WriteLine (j.ToString ());
 				}
 				Console.Out.Write ("</pre>");
 			}
+			
+			Console.Out.WriteLine ("Wrote " + lines + " lines");
 		}
 		
 		public void WriteInstructions (string filename)
 		{
+			using (System.IO.StreamWriter outPath = new System.IO.StreamWriter (filename, true)) 
+			{
+				foreach (InstructionBlock i in instructionBlocks) 
+				{
+					foreach (Instruction j in i.instructions)
+					{
+						outPath.WriteLine (j.ToString ());
+					}
+				}
+			}
 		}
 	}
 }
