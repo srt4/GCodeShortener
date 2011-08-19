@@ -108,8 +108,8 @@ namespace GCodeShortener
 		
 		public double NewDistance (InstructionBlock other)
 		{
-			double a = this.FirstPoint ().x - other.LastPoint ().x;
-			double b = this.FirstPoint ().y - other.LastPoint ().y;
+			double a = this.LastPoint ().x - other.FirstPoint ().x;
+			double b = this.LastPoint ().y - other.FirstPoint ().y;
 			double csquared = Math.Pow (a, 2) + Math.Pow (b, 2);
 			return Math.Sqrt (csquared);
 		}
@@ -131,4 +131,15 @@ namespace GCodeShortener
 		}	
 	}
 }
+/*
+Inner.optimized
+The total distance traveled in this file is 492
+Inner
+The total distance traveled in this file is 861
+ 
+Outer.optimized
 
+Outer
+The total distance traveled in this file is 446
+
+*/
